@@ -5,6 +5,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <math.h>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "helpers.h"
@@ -20,6 +21,22 @@ using std::vector;
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
+
+void convert_to_vehicle_coords(vector<double>& ptsx, vector<double>& ptsy, double veh_x, double veh_y, double veh_heading) {
+  assert(ptsx.size() == ptsy.size());
+
+  double alpha = -veh_heading;
+  for (int i=0; i<ptsx.size(); i++) {
+    double x1 = ptsx[i] - veh_x;
+    double y1 = ptsy[i] - veh_y;
+
+    double x2 = cos(alpha) * x1 - sin(alpha) * y1;
+    double y2 = sin(alpha) * x1 + cos(alpha) * y1;
+
+    ptsx[i] = x2;
+    ptsy[i] = y2;
+  }
+}
 
 int main() {
   uWS::Hub h;
@@ -48,29 +65,31 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
+          convert_to_vehicle_coords(ptsx, ptsy, px, py, psi);
+
           /**
            * TODO: Calculate steering angle and throttle using MPC.
            * Both are in between [-1, 1].
            */
-          double steer_value;
-          double throttle_value;
+          double steer_value = 0;
+          double throttle_value = 0;
 
           json msgJson;
-          // NOTE: Remember to divide by deg2rad(25) before you send the 
-          //   steering value back. Otherwise the values will be in between 
+          // NOTE: Remember to divide by deg2rad(25) before you send the
+          //   steering value back. Otherwise the values will be in between
           //   [-deg2rad(25), deg2rad(25] instead of [-1, 1].
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
 
-          // Display the MPC predicted trajectory 
+          // Display the MPC predicted trajectory
           vector<double> mpc_x_vals;
           vector<double> mpc_y_vals;
 
-          /**
-           * TODO: add (x,y) points to list here, points are in reference to 
-           *   the vehicle's coordinate system the points in the simulator are 
-           *   connected by a Green line
-           */
+          mpc_x_vals.push_back(1);
+          mpc_x_vals.push_back(10);
+
+          mpc_y_vals.push_back(0);
+          mpc_y_vals.push_back(0);
 
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
@@ -79,11 +98,12 @@ int main() {
           vector<double> next_x_vals;
           vector<double> next_y_vals;
 
-          /**
-           * TODO: add (x,y) points to list here, points are in reference to 
-           *   the vehicle's coordinate system the points in the simulator are 
-           *   connected by a Yellow line
-           */
+          for (const auto& x : ptsx) {
+            next_x_vals.push_back(x);
+          }
+          for (const auto& y : ptsy) {
+            next_y_vals.push_back(y);
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
