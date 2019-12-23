@@ -51,7 +51,15 @@ class FG_eval {
 MPC::MPC() {}
 MPC::~MPC() {}
 
-std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
+MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
+  Trajectory traj;
+  traj.ptsx.push_back(1);
+  traj.ptsx.push_back(10);
+  traj.ptsy.push_back(0);
+  traj.ptsy.push_back(0);
+
+  return {0.0, 0.0, traj};
+
   bool ok = true;
   typedef CPPAD_TESTVECTOR(double) Dvector;
 

@@ -3,17 +3,20 @@
 
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
+#include "models.h"
+
+using namespace carnd;
 
 class MPC {
- public:
+public:
   MPC();
 
   virtual ~MPC();
 
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuations.
-  std::vector<double> Solve(const Eigen::VectorXd &state, 
-                            const Eigen::VectorXd &coeffs);
+  MpcSolution solve(const Eigen::VectorXd &state,
+                    const Eigen::VectorXd &coeffs);
 };
 
 #endif  // MPC_H

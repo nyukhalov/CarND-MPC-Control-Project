@@ -22,7 +22,12 @@ constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
 
-void convert_to_vehicle_coords(vector<double>& ptsx, vector<double>& ptsy, double veh_x, double veh_y, double veh_heading) {
+void convert_to_vehicle_coords(
+    const vector<double>& ptsx,
+    const vector<double>& ptsy,
+    double veh_x, double veh_y, double veh_heading,
+    vector<double>& veh_ptsx,
+    vector<double>& veh_ptsy) {
   assert(ptsx.size() == ptsy.size());
 
   double alpha = -veh_heading;
@@ -33,8 +38,8 @@ void convert_to_vehicle_coords(vector<double>& ptsx, vector<double>& ptsy, doubl
     double x2 = cos(alpha) * x1 - sin(alpha) * y1;
     double y2 = sin(alpha) * x1 + cos(alpha) * y1;
 
-    ptsx[i] = x2;
-    ptsy[i] = y2;
+    veh_ptsx[i] = x2;
+    veh_ptsy[i] = y2;
   }
 }
 
@@ -65,48 +70,28 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
-          convert_to_vehicle_coords(ptsx, ptsy, px, py, psi);
+          vector<double> veh_ptsx(ptsx.size());
+          vector<double> veh_ptsy(ptsy.size());
+          convert_to_vehicle_coords(ptsx, ptsy, px, py, psi, veh_ptsx, veh_ptsy);
 
-          /**
-           * TODO: Calculate steering angle and throttle using MPC.
-           * Both are in between [-1, 1].
-           */
-          double steer_value = 0;
-          double throttle_value = 0;
+          VectorXd state(4);
+          state << px, py, psi, v;
+
+          VectorXd v_ptsx = VectorXd::Map(ptsx.data(), ptsx.size());
+          VectorXd v_ptsy = VectorXd::Map(ptsy.data(), ptsy.size());
+          VectorXd coeffs = polyfit(v_ptsx, v_ptsy, 3);
+
+          MpcSolution solution = mpc.solve(state, coeffs);
 
           json msgJson;
-          // NOTE: Remember to divide by deg2rad(25) before you send the
-          //   steering value back. Otherwise the values will be in between
-          //   [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = throttle_value;
-
-          // Display the MPC predicted trajectory
-          vector<double> mpc_x_vals;
-          vector<double> mpc_y_vals;
-
-          mpc_x_vals.push_back(1);
-          mpc_x_vals.push_back(10);
-
-          mpc_y_vals.push_back(0);
-          mpc_y_vals.push_back(0);
-
-          msgJson["mpc_x"] = mpc_x_vals;
-          msgJson["mpc_y"] = mpc_y_vals;
-
-          // Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
-
-          for (const auto& x : ptsx) {
-            next_x_vals.push_back(x);
-          }
-          for (const auto& y : ptsy) {
-            next_y_vals.push_back(y);
-          }
-
-          msgJson["next_x"] = next_x_vals;
-          msgJson["next_y"] = next_y_vals;
+          msgJson["steering_angle"] = solution.steering / deg2rad(25);
+          msgJson["throttle"] = solution.throttle;
+          // predicted MPC trajectory
+          msgJson["mpc_x"] = solution.trajectory.ptsx;
+          msgJson["mpc_y"] = solution.trajectory.ptsy;
+          // reference line
+          msgJson["next_x"] = veh_ptsx;
+          msgJson["next_y"] = veh_ptsy;
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
