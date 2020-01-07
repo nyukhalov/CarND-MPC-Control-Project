@@ -70,26 +70,35 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
-          vector<double> veh_ptsx(ptsx.size());
-          vector<double> veh_ptsy(ptsy.size());
-          convert_to_vehicle_coords(ptsx, ptsy, px, py, psi, veh_ptsx, veh_ptsy);
-
-          VectorXd state(4);
-          state << px, py, psi, v;
-
           VectorXd v_ptsx = VectorXd::Map(ptsx.data(), ptsx.size());
           VectorXd v_ptsy = VectorXd::Map(ptsy.data(), ptsy.size());
           VectorXd coeffs = polyfit(v_ptsx, v_ptsy, 3);
 
+          // the current cross track error
+          double cte = polyeval(coeffs, px) - py;
+          // the current orientation error
+          double epsi = psi - atan(polyderiveval(coeffs, px));
+
+          VectorXd state(6);
+          state << px, py, psi, v, cte, epsi;
+
           MpcSolution solution = mpc.solve(state, coeffs);
 
           json msgJson;
-          msgJson["steering_angle"] = solution.steering / deg2rad(25);
+          msgJson["steering_angle"] = -solution.steering / deg2rad(25);
           msgJson["throttle"] = solution.throttle;
+
           // predicted MPC trajectory
-          msgJson["mpc_x"] = solution.trajectory.ptsx;
-          msgJson["mpc_y"] = solution.trajectory.ptsy;
+          vector<double> mpc_ptsx(solution.trajectory.ptsx.size());
+          vector<double> mpc_ptsy(solution.trajectory.ptsy.size());
+          convert_to_vehicle_coords(solution.trajectory.ptsx, solution.trajectory.ptsy, px, py, psi, mpc_ptsx, mpc_ptsy);            
+          msgJson["mpc_x"] = mpc_ptsx;
+          msgJson["mpc_y"] = mpc_ptsy;
+
           // reference line
+          vector<double> veh_ptsx(ptsx.size());
+          vector<double> veh_ptsy(ptsy.size());
+          convert_to_vehicle_coords(ptsx, ptsy, px, py, psi, veh_ptsx, veh_ptsy);          
           msgJson["next_x"] = veh_ptsx;
           msgJson["next_y"] = veh_ptsy;
 
