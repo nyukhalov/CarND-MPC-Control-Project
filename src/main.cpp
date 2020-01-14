@@ -51,8 +51,19 @@ int main() {
   double target_vel = 50;
   MPC mpc(target_vel);
 
-  h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+
+  auto cb_last = std::chrono::steady_clock::now();
+
+  h.onMessage([&mpc, &cb_last](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
+
+    auto cb_elapsed = std::chrono::steady_clock::now() - cb_last;
+    cb_last = std::chrono::steady_clock::now();
+    std::cout << "Callback took "
+              << std::chrono::duration_cast<std::chrono::milliseconds> (cb_elapsed).count()
+              << "ms"
+              << std::endl;
+
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -93,11 +104,11 @@ int main() {
           VectorXd state(6);
           state << v_px, v_py, v_psi, v, cte, epsi;
 
-          std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+          auto mpc_clock_begin = std::chrono::steady_clock::now();
           MpcSolution solution = mpc.solve(state, coeffs);
-          std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+          auto mpc_elapsed = std::chrono::steady_clock::now() - mpc_clock_begin;
           std::cout << "MPC solver took "
-                    << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count()
+                    << std::chrono::duration_cast<std::chrono::milliseconds> (mpc_elapsed).count()
                     << "ms"
                     << std::endl;
 
