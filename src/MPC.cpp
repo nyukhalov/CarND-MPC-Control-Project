@@ -61,15 +61,15 @@ class FG_eval {
       AD<double> cte = vars[t + cte_start];
       AD<double> epsi = vars[t + epsi_start];
       AD<double> vel_err = vars[t + v_start] - _target_vel;
-      fg[0] += 100 * CppAD::pow(cte, 2);
+      fg[0] += CppAD::pow(cte, 2);
       fg[0] += CppAD::pow(epsi, 2);
       fg[0] += CppAD::pow(vel_err, 2);
     }
 
-    // for (int t = 0; t < N - 1; ++t) {
-    //   fg[0] += CppAD::pow(vars[t + delta_start], 2);
-    //   fg[0] += CppAD::pow(vars[t + a_start], 2);
-    // }
+    for (int t = 0; t < N - 1; ++t) {
+      fg[0] += 100 * CppAD::pow(vars[t + delta_start], 2);
+      fg[0] += CppAD::pow(vars[t + a_start], 2);
+    }
 
     // for (int t = 1; t < N - 1; ++t) {
     //   fg[0] += 100 * CppAD::pow(vars[t + delta_start] - vars[t - 1 + delta_start], 2);
