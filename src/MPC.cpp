@@ -113,10 +113,10 @@ class FG_eval {
 
       fg[1 + t + x_start] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[1 + t + y_start] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
-      fg[1 + t + psi_start] = psi1 - (psi0 + delta0 * (v0/Lf) * dt);
+      fg[1 + t + psi_start] = psi1 - (psi0 + CppAD::tan(delta0) * (v0/Lf) * dt);
       fg[1 + t + v_start] = v1 - (v0 + a0 * dt);
-      fg[1 + t + cte_start] = cte1 - ((y0_desired - y0) + v0 * CppAD::sin(epsi0) * dt);
-      fg[1 + t + epsi_start] = epsi1 - ((psi0 - psi0_desired) + delta0 * (v0/Lf) * dt);
+      fg[1 + t + cte_start] = cte1 - (y0_desired - y0);
+      fg[1 + t + epsi_start] = epsi1 - (psi0 - psi0_desired);
     }
   }
 };
