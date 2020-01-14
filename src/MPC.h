@@ -9,7 +9,7 @@ using namespace carnd;
 
 class MPC {
 public:
-  MPC();
+  MPC(double target_vel);
 
   virtual ~MPC();
 
@@ -17,6 +17,9 @@ public:
   // Return the first actuations.
   MpcSolution solve(const Eigen::VectorXd &state,
                     const Eigen::VectorXd &coeffs);
+
+private:
+  const double _target_vel;
 };
 
 #endif  // MPC_H

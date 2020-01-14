@@ -25,26 +25,27 @@ double dt = 0.05;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
-// reference velocity
-const double ref_vel = 5;
-
+const unsigned int num_states = N;
+const unsigned int num_actuations = N - 1;
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
 // when one variable starts and another ends to make our lifes easier.
 size_t x_start = 0;
-size_t y_start = x_start + N;
-size_t psi_start = y_start + N;
-size_t v_start = psi_start + N;
-size_t cte_start = v_start + N;
-size_t epsi_start = cte_start + N;
-size_t delta_start = epsi_start + N;
-size_t a_start = delta_start + N - 1;
+size_t y_start = x_start + num_states;
+size_t psi_start = y_start + num_states;
+size_t v_start = psi_start + num_states;
+size_t cte_start = v_start + num_states;
+size_t epsi_start = cte_start + num_states;
+size_t delta_start = epsi_start + num_states;
+size_t a_start = delta_start + num_actuations;
 
 class FG_eval {
  public:
   // Fitted polynomial coefficients
   VectorXd coeffs;
-  FG_eval(VectorXd coeffs) { this->coeffs = coeffs; }
+  const double _target_vel;
+
+  FG_eval(VectorXd coeffs, double target_vel): _target_vel(target_vel) { this->coeffs = coeffs; }
 
   typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
 
@@ -59,21 +60,21 @@ class FG_eval {
     for (int t = 0; t < N; ++t) {
       AD<double> cte = vars[t + cte_start];
       AD<double> epsi = vars[t + epsi_start];
-      AD<double> vel_err = vars[t + v_start] - ref_vel;
-      fg[0] += CppAD::pow(cte, 2);
+      AD<double> vel_err = vars[t + v_start] - _target_vel;
+      fg[0] += 100 * CppAD::pow(cte, 2);
       fg[0] += CppAD::pow(epsi, 2);
       fg[0] += CppAD::pow(vel_err, 2);
     }
 
-    for (int t = 0; t < N - 1; ++t) {
-      fg[0] += CppAD::pow(vars[t + delta_start], 2);
-      fg[0] += CppAD::pow(vars[t + a_start], 2);
-    }
+    // for (int t = 0; t < N - 1; ++t) {
+    //   fg[0] += CppAD::pow(vars[t + delta_start], 2);
+    //   fg[0] += CppAD::pow(vars[t + a_start], 2);
+    // }
 
-    for (int t = 1; t < N - 1; ++t) {
-      fg[0] += 100 * CppAD::pow(vars[t + delta_start] - vars[t - 1 + delta_start], 2);
-      fg[0] += CppAD::pow(vars[t + a_start] - vars[t - 1 + a_start], 2);
-    }
+    // for (int t = 1; t < N - 1; ++t) {
+    //   fg[0] += 100 * CppAD::pow(vars[t + delta_start] - vars[t - 1 + delta_start], 2);
+    //   fg[0] += CppAD::pow(vars[t + a_start] - vars[t - 1 + a_start], 2);
+    // }
 
 
     //
@@ -107,15 +108,15 @@ class FG_eval {
       AD<double> delta0     = vars[t - 1 + delta_start];
       AD<double> a0         = vars[t - 1 + a_start];
       AD<double> epsi0      = vars[t - 1 + epsi_start];
-      AD<double> psidest0   = polyderiveval(coeffs, x0);
-      AD<double> fx0        = polyeval(coeffs, x0);
+      AD<double> y0_desired   = polyeval(coeffs, x0);
+      AD<double> psi0_desired = CppAD::atan(polyderiveval(coeffs, x0));
 
       fg[1 + t + x_start] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[1 + t + y_start] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
       fg[1 + t + psi_start] = psi1 - (psi0 + delta0 * (v0/Lf) * dt);
       fg[1 + t + v_start] = v1 - (v0 + a0 * dt);
-      fg[1 + t + cte_start] = cte1 - (fx0 - y0 + v0 * CppAD::sin(epsi0) * dt);
-      fg[1 + t + epsi_start] = epsi1 - (epsi0 - psidest0 + delta0 * (v0/Lf) * dt);
+      fg[1 + t + cte_start] = cte1 - ((y0_desired - y0) + v0 * CppAD::sin(epsi0) * dt);
+      fg[1 + t + epsi_start] = epsi1 - ((psi0 - psi0_desired) + delta0 * (v0/Lf) * dt);
     }    
   }
 };
@@ -123,7 +124,7 @@ class FG_eval {
 //
 // MPC class definition implementation.
 //
-MPC::MPC() {}
+MPC::MPC(double target_vel): _target_vel(target_vel) {}
 MPC::~MPC() {}
 
 MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
@@ -138,7 +139,7 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
 
   // number of independent variables
   // N timesteps == N - 1 actuations
-  size_t n_vars = N * 6 + (N - 1) * 2;
+  size_t n_vars = (num_states * 6) + (num_actuations * 2);
   // Number of constraints
   size_t n_constraints = N * 6;
 
@@ -167,19 +168,14 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
     vars_upperbound[i] = 1.0e19;
   }
 
-  // The upper and lower limits of delta are set to -25 and 25
-  // degrees (values in radians).
-  // NOTE: Feel free to change this to something else.
-  for (int i = delta_start; i < a_start; ++i) {
-    vars_lowerbound[i] = -0.436332;
-    vars_upperbound[i] = 0.436332;
-  }
+  for (int i = 0; i < num_actuations; ++i) {
+    // The upper and lower limits of delta are set to -25 and 25 degrees (values in radians).
+    vars_lowerbound[delta_start + i] = -0.436332;
+    vars_upperbound[delta_start + i] = 0.436332;
 
-  // Acceleration/decceleration upper and lower limits.
-  // NOTE: Feel free to change this to something else.
-  for (int i = a_start; i < n_vars; ++i) {
-    vars_lowerbound[i] = -1.0;
-    vars_upperbound[i] = 1.0;
+    // Acceleration/decceleration upper and lower limits.
+    vars_lowerbound[a_start + i] = -1.0;
+    vars_upperbound[a_start + i] = 1.0;
   }
 
   // Lower and upper limits for constraints
@@ -206,7 +202,7 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
   constraints_upperbound[epsi_start] = epsi;
 
   // Object that computes objective and constraints
-  FG_eval fg_eval(coeffs);
+  FG_eval fg_eval(coeffs, _target_vel);
 
   // options
   std::string options;
@@ -231,6 +227,27 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
 
+  std::cout << "State:"
+            << " \tCTE: "  << std::setw(7) << solution.x[cte_start]
+            << " \tEpsi: " << std::setw(7) << solution.x[epsi_start]
+            << " \tVel: "  << std::setw(7) << solution.x[v_start]
+            << std::endl;
+
+  for (int i=1; i<N; i++) {
+    std::cout << "\t[A " << std::setw(2) << i << "]"
+              << " \tsteering: " << std::setw(7) << solution.x[delta_start + i - 1] 
+              << " \taccel: "    << std::setw(7) << solution.x[a_start + i - 1] 
+              << std::endl;
+
+    std::cout << "State:"
+              << " \tCTE: "  << std::setw(7) << solution.x[cte_start + i]
+              << " \tEpsi: " << std::setw(7) << solution.x[epsi_start + i]
+              << " \tVel: "  << std::setw(7) << solution.x[v_start + i]
+              << std::endl;
+  }
+  // for (int i=0; i<num_actuations; i++) {
+  //   std::cout << "throttle[" << std::setw(2) << i << "]: " << solution.x[a_start + i] << std::endl;
+  // }
 
   Trajectory traj;
   for (int i=0; i<N; i++) {
