@@ -96,12 +96,10 @@ int main() {
           std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
           MpcSolution solution = mpc.solve(state, coeffs);
           std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-          std::cout << "Time difference = "
+          std::cout << "MPC solver took "
                     << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count()
-                    << "[ms]"
+                    << "ms"
                     << std::endl;
-
-          //solution.throttle = 0.1;
 
           json msgJson;
           msgJson["steering_angle"] = -solution.steering / deg2rad(25);
@@ -113,14 +111,10 @@ int main() {
           msgJson["mpc_x"] = mpc_ptsx;
           msgJson["mpc_y"] = mpc_ptsy;
 
-          // reference trajectory
-          // vector<double> veh_ptsx(ptsx.size());
-          // vector<double> veh_ptsy(ptsy.size());
-          // convert_to_vehicle_coords(ptsx, ptsy, px, py, psi, veh_ptsx, veh_ptsy);
-
+          // reference waypoints
           vector<double> veh_ptsx2;
           vector<double> veh_ptsy2;
-          for (double x=0; x<50; x+=2) {
+          for (double x=0; x<100; x+=4) {
             veh_ptsx2.push_back(x);
             veh_ptsy2.push_back(polyeval(coeffs, x));
           }
@@ -130,6 +124,7 @@ int main() {
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
+
           // Latency
           // The purpose is to mimic real driving conditions where
           //   the car does actuate the commands instantly.
@@ -139,6 +134,7 @@ int main() {
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE SUBMITTING.
           // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {

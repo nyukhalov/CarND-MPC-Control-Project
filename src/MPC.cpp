@@ -225,28 +225,25 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
   auto cost = solution.obj_value;
-  std::cout << "Cost " << cost << std::endl;
+  // std::cout << "Cost " << cost << std::endl;
 
-  std::cout << "State:"
-            << " \tCTE: "  << std::setw(7) << solution.x[cte_start]
-            << " \tEpsi: " << std::setw(7) << solution.x[epsi_start]
-            << " \tVel: "  << std::setw(7) << solution.x[v_start]
-            << std::endl;
+  // std::cout << "State:"
+  //           << " \tCTE: "  << std::setw(7) << solution.x[cte_start]
+  //           << " \tEpsi: " << std::setw(7) << solution.x[epsi_start]
+  //           << " \tVel: "  << std::setw(7) << solution.x[v_start]
+  //           << std::endl;
 
-  for (int i=1; i<N; i++) {
-    std::cout << "\t[A " << std::setw(2) << i << "]"
-              << " \tsteering: " << std::setw(7) << solution.x[delta_start + i - 1]
-              << " \taccel: "    << std::setw(7) << solution.x[a_start + i - 1] 
-              << std::endl;
+  // for (int i=1; i<N; i++) {
+  //   std::cout << "\t[A " << std::setw(2) << i << "]"
+  //             << " \tsteering: " << std::setw(7) << solution.x[delta_start + i - 1]
+  //             << " \taccel: "    << std::setw(7) << solution.x[a_start + i - 1] 
+  //             << std::endl;
 
-    std::cout << "State:"
-              << " \tCTE: "  << std::setw(7) << solution.x[cte_start + i]
-              << " \tEpsi: " << std::setw(7) << solution.x[epsi_start + i]
-              << " \tVel: "  << std::setw(7) << solution.x[v_start + i]
-              << std::endl;
-  }
-  // for (int i=0; i<num_actuations; i++) {
-  //   std::cout << "throttle[" << std::setw(2) << i << "]: " << solution.x[a_start + i] << std::endl;
+  //   std::cout << "State:"
+  //             << " \tCTE: "  << std::setw(7) << solution.x[cte_start + i]
+  //             << " \tEpsi: " << std::setw(7) << solution.x[epsi_start + i]
+  //             << " \tVel: "  << std::setw(7) << solution.x[v_start + i]
+  //             << std::endl;
   // }
 
   Trajectory traj;
