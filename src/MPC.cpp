@@ -10,8 +10,8 @@
 using CppAD::AD;
 using Eigen::VectorXd;
 
-size_t N = 25;
-double dt = 0.05;
+size_t N = 10;
+double dt = 0.1;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -117,7 +117,7 @@ class FG_eval {
       fg[1 + t + v_start] = v1 - (v0 + a0 * dt);
       fg[1 + t + cte_start] = cte1 - ((y0_desired - y0) + v0 * CppAD::sin(epsi0) * dt);
       fg[1 + t + epsi_start] = epsi1 - ((psi0 - psi0_desired) + delta0 * (v0/Lf) * dt);
-    }    
+    }
   }
 };
 
@@ -235,7 +235,7 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
 
   for (int i=1; i<N; i++) {
     std::cout << "\t[A " << std::setw(2) << i << "]"
-              << " \tsteering: " << std::setw(7) << solution.x[delta_start + i - 1] 
+              << " \tsteering: " << std::setw(7) << solution.x[delta_start + i - 1]
               << " \taccel: "    << std::setw(7) << solution.x[a_start + i - 1] 
               << std::endl;
 
