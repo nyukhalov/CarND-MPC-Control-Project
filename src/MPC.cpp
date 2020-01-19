@@ -34,9 +34,7 @@ size_t x_start = 0;
 size_t y_start = x_start + num_states;
 size_t psi_start = y_start + num_states;
 size_t v_start = psi_start + num_states;
-size_t cte_start = v_start + num_states;
-size_t epsi_start = cte_start + num_states;
-size_t delta_start = epsi_start + num_states;
+size_t delta_start = v_start + num_states;
 size_t a_start = delta_start + num_actuations;
 
 class FG_eval {
@@ -57,10 +55,18 @@ class FG_eval {
     fg[0] = 0;
 
     // Reference State Cost
-    for (int t = 0; t < N; ++t) {
-      AD<double> cte = vars[t + cte_start];
-      AD<double> epsi = vars[t + epsi_start];
+    for (int t = 0; t < num_states; ++t) {
+      AD<double> x = vars[t + x_start];
+      AD<double> y = vars[t + y_start];
+      AD<double> y_des = polyeval(coeffs, x);
+      AD<double> cte = y_des - y;
+
+      AD<double> psi = vars[t + psi_start];
+      AD<double> psi_des = CppAD::atan(polyderiveval(coeffs, x));
+      AD<double> epsi = psi - psi_des;
+
       AD<double> vel_err = vars[t + v_start] - _target_vel;
+
       fg[0] += CppAD::pow(cte, 2);
       fg[0] += CppAD::pow(epsi, 2);
       fg[0] += CppAD::pow(vel_err, 2);
@@ -89,8 +95,6 @@ class FG_eval {
     fg[1 + y_start] = vars[y_start];
     fg[1 + psi_start] = vars[psi_start];
     fg[1 + v_start] = vars[v_start];
-    fg[1 + cte_start] = vars[cte_start];
-    fg[1 + epsi_start] = vars[epsi_start];
 
     // The rest of the constraints
     for (int t = 1; t < N; ++t) {
@@ -98,8 +102,6 @@ class FG_eval {
       AD<double> y1     = vars[t + y_start];
       AD<double> psi1   = vars[t + psi_start];
       AD<double> v1     = vars[t + v_start];
-      AD<double> cte1   = vars[t + cte_start];
-      AD<double> epsi1  = vars[t + epsi_start];
 
       AD<double> x0         = vars[t - 1 + x_start];
       AD<double> y0         = vars[t - 1 + y_start];
@@ -107,16 +109,12 @@ class FG_eval {
       AD<double> v0         = vars[t - 1 + v_start];
       AD<double> delta0     = vars[t - 1 + delta_start];
       AD<double> a0         = vars[t - 1 + a_start];
-      AD<double> epsi0      = vars[t - 1 + epsi_start];
       AD<double> y0_desired   = polyeval(coeffs, x0);
-      AD<double> psi0_desired = CppAD::atan(polyderiveval(coeffs, x0));
 
       fg[1 + t + x_start] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[1 + t + y_start] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
       fg[1 + t + psi_start] = psi1 - (psi0 + CppAD::tan(delta0) * (v0/Lf) * dt);
       fg[1 + t + v_start] = v1 - (v0 + a0 * dt);
-      fg[1 + t + cte_start] = cte1 - (y0_desired - y0);
-      fg[1 + t + epsi_start] = epsi1 - (psi0 - psi0_desired);
     }
   }
 };
@@ -134,8 +132,6 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
   double y = state[1];
   double psi = state[2];
   double v = state[3];
-  double cte = state[4];
-  double epsi = state[5];
 
   // number of independent variables
   // N timesteps == N - 1 actuations
@@ -154,8 +150,6 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
   vars[y_start] = y;
   vars[psi_start] = psi;
   vars[v_start] = v;
-  vars[cte_start] = cte;
-  vars[epsi_start] = epsi;
 
   // Lower and upper limits for x
   Dvector vars_lowerbound(n_vars);
@@ -191,15 +185,11 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) {
   constraints_lowerbound[y_start] = y;
   constraints_lowerbound[psi_start] = psi;
   constraints_lowerbound[v_start] = v;
-  constraints_lowerbound[cte_start] = cte;
-  constraints_lowerbound[epsi_start] = epsi;
 
   constraints_upperbound[x_start] = x;
   constraints_upperbound[y_start] = y;
   constraints_upperbound[psi_start] = psi;
   constraints_upperbound[v_start] = v;
-  constraints_upperbound[cte_start] = cte;
-  constraints_upperbound[epsi_start] = epsi;
 
   // Object that computes objective and constraints
   FG_eval fg_eval(coeffs, _target_vel);

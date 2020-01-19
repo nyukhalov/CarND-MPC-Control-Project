@@ -51,7 +51,6 @@ int main() {
   double target_vel = 50;
   MPC mpc(target_vel);
 
-
   auto cb_last = std::chrono::steady_clock::now();
 
   h.onMessage([&mpc, &cb_last](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
@@ -96,13 +95,8 @@ int main() {
           double v_py = 0;
           double v_psi = 0;
 
-          // the current cross track error
-          double cte = polyeval(coeffs, v_px) - v_py;
-          // the current orientation error
-          double epsi = v_psi - atan(polyderiveval(coeffs, v_px));
-
-          VectorXd state(6);
-          state << v_px, v_py, v_psi, v, cte, epsi;
+          VectorXd state(4);
+          state << v_px, v_py, v_psi, v;
 
           auto mpc_clock_begin = std::chrono::steady_clock::now();
           MpcSolution solution = mpc.solve(state, coeffs);
