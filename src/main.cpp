@@ -44,12 +44,33 @@ void convert_to_vehicle_coords(
   }
 }
 
+MPC init_mpc() {
+  const double target_vel = 50;
+
+  // prediction horizon settings
+  const size_t num_states = 10;
+  const double dt = 0.1;
+  
+  // This value assumes the model presented in the classroom is used.
+  //
+  // It was obtained by measuring the radius formed by running the vehicle in the
+  // simulator around in a circle with a constant steering angle and velocity on
+  // a flat terrain.
+  //
+  // The value was tuned until the the radius formed by the simulating the model
+  // presented in the classroom matched the previous radius
+  const double lf = 2.67;
+
+  MPCConfig config(num_states, dt, target_vel, lf);
+  MPC mpc(config);
+
+  return mpc;
+}
+
 int main() {
   uWS::Hub h;
 
-  // MPC is initialized here!
-  double target_vel = 50;
-  MPC mpc(target_vel);
+  const MPC mpc = init_mpc();
 
   auto cb_last = std::chrono::steady_clock::now();
 
@@ -150,11 +171,11 @@ int main() {
     }  // end websocket if
   }); // end h.onMessage
 
-  h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
+  h.onConnection([](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
     std::cout << "Connected!!!" << std::endl;
   });
 
-  h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code,
+  h.onDisconnection([](uWS::WebSocket<uWS::SERVER> ws, int code,
                          char *message, size_t length) {
     ws.close();
     std::cout << "Disconnected" << std::endl;
