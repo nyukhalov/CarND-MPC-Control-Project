@@ -12,6 +12,7 @@ public:
   Window(size_t width, size_t height, std::string name);
 
   void circle(cv::Point center, size_t radius, cv::Scalar color, int thickness=1);
+  void line(cv::Point from, cv::Point to, cv::Scalar color);
   void draw();
 
   const size_t width;

@@ -5,11 +5,10 @@
 
 namespace carnd {
 
-typedef std::vector<double> Coords;
-
-struct Trajectory {
-  Coords ptsx;
-  Coords ptsy;
+struct Pose {
+  double x;
+  double y;
+  double heading;
 };
 
 /**
@@ -19,7 +18,7 @@ struct MpcSolution {
   // steering is in radians
   double steering;
   double throttle;
-  Trajectory trajectory;
+  std::vector<Pose> trajectory;
 };
 
 } // namespace carnd

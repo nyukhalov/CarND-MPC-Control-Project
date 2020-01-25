@@ -100,7 +100,7 @@ int main()
   uWS::Hub h;
 
   Window window(500, 500, "Main");
-  double scale_x = 4;
+  double scale_x = 8;
   double scale_y = scale_x;
   double x_offset = 0.5 * window.width;
   double y_offset = 0.1 * window.height;
@@ -170,8 +170,12 @@ int main()
           msgJson["throttle"] = solution.throttle;
 
           // predicted MPC trajectory
-          auto mpc_ptsx = solution.trajectory.ptsx;
-          auto mpc_ptsy = solution.trajectory.ptsy;
+          std::vector<double> mpc_ptsx;
+          std::vector<double> mpc_ptsy;
+          for (const Pose& pose : solution.trajectory) {
+            mpc_ptsx.push_back(pose.x);
+            mpc_ptsy.push_back(pose.y);
+          }
           msgJson["mpc_x"] = mpc_ptsx;
           msgJson["mpc_y"] = mpc_ptsy;
 
@@ -183,7 +187,6 @@ int main()
             veh_ptsx2.push_back(x);
             veh_ptsy2.push_back(polyeval(coeffs, x));
           }
-
           msgJson["next_x"] = veh_ptsx2;
           msgJson["next_y"] = veh_ptsy2;
 
@@ -191,19 +194,26 @@ int main()
           std::cout << msg << std::endl;
 
           // drawing the current trajectories
-          double node_radius = 6;
+          double node_radius = 10;
           // the colors are in BGR
           cv::Scalar ref_node_color = cv::Scalar(200, 255, 255);
           cv::Scalar mpc_node_color = cv::Scalar(0, 255, 0);
+          cv::Scalar heading_color = cv::Scalar(0, 0, 255);
           for (int i = 0; i < veh_ptsx2.size(); i++)
           {
             cv::Point point = pt.transform(veh_ptsx2[i], veh_ptsy2[i]);
             window.circle(point, node_radius, ref_node_color);
           }
-          for (int i = 0; i < mpc_ptsx.size(); i++)
+          for (const Pose& pose : solution.trajectory)
           {
-            cv::Point point = pt.transform(mpc_ptsx[i], mpc_ptsy[i]);
+            double heading = M_PI + M_PI/2 - pose.heading;
+            cv::Point point = pt.transform(pose.x, pose.y);
+            cv::Point heading_point(
+              point.x + node_radius*cos(heading),
+              point.y + node_radius*sin(heading)
+            );
             window.circle(point, node_radius, mpc_node_color, -1);
+            window.line(point, heading_point, heading_color);
           }
           window.draw();
 

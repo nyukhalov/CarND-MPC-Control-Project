@@ -17,6 +17,10 @@ void Window::circle(cv::Point center, size_t radius, cv::Scalar color, int thick
   cv::circle(_frame, center, radius, color, thickness);
 }
 
+void Window::line(cv::Point from, cv::Point to, cv::Scalar color) {
+  cv::line(_frame, from, to, color);
+}
+
 void Window::draw() {
   imshow(_name, _frame);
   cv::waitKey(1);
