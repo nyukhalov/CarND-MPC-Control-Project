@@ -2,6 +2,8 @@ project(MPC)
 
 cmake_minimum_required (VERSION 3.5)
 
+find_package(OpenCV REQUIRED)
+
 # -g allows for gdb debugging
 # turn on -03 for best performance
 add_definitions(-std=c++11 -O3)
@@ -9,15 +11,17 @@ add_definitions(-std=c++11 -O3)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
-set(sources 
+set(sources
     src/MPC.cpp
     src/main.cpp
     src/helpers.cpp
+    src/window.cpp
 )
 
 include_directories(/usr/local/include)
 link_directories(/usr/local/lib)
 include_directories(src/Eigen-3.3)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
@@ -29,5 +33,5 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 add_executable(mpc ${sources})
 
-target_link_libraries(mpc ipopt z ssl uv uWS)
+target_link_libraries(mpc ipopt z ssl uv uWS ${OpenCV_LIBS})
 

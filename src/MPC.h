@@ -2,6 +2,7 @@
 #define MPC_H
 
 #include <vector>
+#include <iostream>
 #include "Eigen-3.3/Eigen/Core"
 #include "models.h"
 
@@ -26,12 +27,12 @@ struct MPCConfig {
   const size_t delta_start;
   const size_t a_start;
 
-  MPCConfig(size_t num_states, double dt, double target_vel, double lf):
-    num_states(num_states),
-    num_actuations(num_states - 1),
-    dt(dt),
-    target_vel(target_vel),
-    lf(lf),
+  MPCConfig(size_t num_states_in, double dt_in, double target_vel_in, double lf_in):
+    num_states(num_states_in),
+    num_actuations(num_states_in - 1),
+    dt(dt_in),
+    target_vel(target_vel_in),
+    lf(lf_in),
     x_start(0),
     y_start(x_start + num_states),
     psi_start(y_start + num_states),
@@ -41,9 +42,11 @@ struct MPCConfig {
    {}
 };
 
+std::ostream& operator<<(std::ostream& os, const MPCConfig& config);
+
 class MPC {
 public:
-  MPC(const MPCConfig& config);
+  MPC(const MPCConfig config);
 
   virtual ~MPC();
 
@@ -53,7 +56,7 @@ public:
                     const Eigen::VectorXd &coeffs) const;
 
 private:
-  const MPCConfig& _config;
+  const MPCConfig _config;
 };
 
 #endif  // MPC_H

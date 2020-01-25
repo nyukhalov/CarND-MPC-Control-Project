@@ -10,6 +10,18 @@
 using CppAD::AD;
 using Eigen::VectorXd;
 
+std::ostream& operator<<(std::ostream& os, const MPCConfig& config) {
+  os << "MPCConfig{"
+     << " num_states=" << config.num_states
+     << " num_actuations=" << config.num_actuations
+     << " dt=" << config.dt
+     << " target_vel=" << config.target_vel
+     << " lf=" << config.lf
+     << "}";
+  return os;
+}
+
+
 class FG_eval {
  public:
   // Fitted polynomial coefficients
@@ -96,7 +108,7 @@ class FG_eval {
 //
 // MPC class definition implementation.
 //
-MPC::MPC(const MPCConfig& config): _config(config) {}
+MPC::MPC(const MPCConfig config): _config(config) {}
 MPC::~MPC() {}
 
 MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) const {
@@ -110,7 +122,8 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) const {
   // number of independent variables
   // N timesteps == N - 1 actuations
   size_t num_state_vars = 4;
-  size_t n_vars = (_config.num_states * num_state_vars) + (_config.num_actuations * 2);
+  size_t num_actuation_vars = 2;
+  size_t n_vars = (_config.num_states * num_state_vars) + (_config.num_actuations * num_actuation_vars);
   // Number of constraints
   size_t n_constraints = _config.num_states * num_state_vars;
 
