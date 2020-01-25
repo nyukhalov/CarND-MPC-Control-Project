@@ -1,5 +1,9 @@
 #include "helpers.h"
 
+double deg2rad(double x) {
+  return x * M_PI / 180;
+}
+
 // Fit a polynomial.
 // Adapted from:
 // https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl#L676-L716

@@ -12,9 +12,7 @@ using std::string;
 // else the empty string "" will be returned.
 string hasData(string s);
 
-//
-// Helper functions to fit and evaluate polynomials.
-//
+double deg2rad(double x);
 
 // Evaluate a polynomial.
 template <class Type>
