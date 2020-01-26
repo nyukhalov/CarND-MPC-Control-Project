@@ -194,7 +194,8 @@ int main()
           std::cout << msg << std::endl;
 
           // drawing the current trajectories
-          double node_radius = 10;
+          double ref_node_radius = 4;
+          double mpc_node_radius = 8;
           // the colors are in BGR
           cv::Scalar ref_node_color = cv::Scalar(200, 255, 255);
           cv::Scalar mpc_node_color = cv::Scalar(0, 255, 0);
@@ -202,19 +203,23 @@ int main()
           for (int i = 0; i < veh_ptsx2.size(); i++)
           {
             cv::Point point = pt.transform(veh_ptsx2[i], veh_ptsy2[i]);
-            window.circle(point, node_radius, ref_node_color);
+            window.circle(point, ref_node_radius, ref_node_color);
           }
           for (const Pose& pose : solution.trajectory)
           {
             double heading = M_PI + M_PI/2 - pose.heading;
             cv::Point point = pt.transform(pose.x, pose.y);
             cv::Point heading_point(
-              point.x + node_radius*cos(heading),
-              point.y + node_radius*sin(heading)
+              point.x + mpc_node_radius*cos(heading),
+              point.y + mpc_node_radius*sin(heading)
             );
-            window.circle(point, node_radius, mpc_node_color, -1);
+            window.circle(point, mpc_node_radius, mpc_node_color, -1);
             window.line(point, heading_point, heading_color);
           }
+          string status = solution.success ? "OK" : "FAIL";
+          cv::Scalar status_color = solution.success ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255);
+          cv::Point status_point(30, 50);
+          window.text(status, status_point, status_color);
           window.draw();
 
           // Latency

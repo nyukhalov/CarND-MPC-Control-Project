@@ -21,6 +21,10 @@ void Window::line(cv::Point from, cv::Point to, cv::Scalar color) {
   cv::line(_frame, from, to, color);
 }
 
+void Window::text(const std::string& text, cv::Point at, cv::Scalar color) {
+  cv::putText(_frame, text, at, cv::FONT_HERSHEY_SIMPLEX, 0.7, color);
+}
+
 void Window::draw() {
   imshow(_name, _frame);
   cv::waitKey(1);

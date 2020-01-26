@@ -15,8 +15,8 @@ struct Pose {
  * @brief contains the first actuation and the best trajectory
  */
 struct MpcSolution {
-  // steering is in radians
-  double steering;
+  bool success;
+  double steering; // in radians
   double throttle;
   std::vector<Pose> trajectory;
 };

@@ -13,6 +13,7 @@ public:
 
   void circle(cv::Point center, size_t radius, cv::Scalar color, int thickness=1);
   void line(cv::Point from, cv::Point to, cv::Scalar color);
+  void text(const std::string& text, cv::Point at, cv::Scalar color);
   void draw();
 
   const size_t width;

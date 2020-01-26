@@ -214,5 +214,5 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) const {
   }
   double steering = solution.x[_config.delta_start];
   double throttle = solution.x[_config.a_start];
-  return {steering, throttle, traj};
+  return {ok, steering, throttle, traj};
 }
