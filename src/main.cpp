@@ -196,9 +196,9 @@ int main()
           // drawing the current trajectories
           double ref_node_radius = 4;
           double mpc_node_radius = 8;
+
           // the colors are in BGR
           cv::Scalar ref_node_color = cv::Scalar(200, 255, 255);
-          cv::Scalar mpc_node_color = cv::Scalar(0, 255, 0);
           cv::Scalar heading_color = cv::Scalar(0, 0, 255);
           for (int i = 0; i < veh_ptsx2.size(); i++)
           {
@@ -207,6 +207,8 @@ int main()
           }
           for (const Pose& pose : solution.trajectory)
           {
+            double vel_progress = 1.0 - (mpc.config.target_vel - pose.velocity) / mpc.config.target_vel;
+            cv::Scalar mpc_node_color = cv::Scalar(0, vel_progress * 255, (1 - vel_progress) * 255);
             double heading = M_PI + M_PI/2 - pose.heading;
             cv::Point point = pt.transform(pose.x, pose.y);
             cv::Point heading_point(

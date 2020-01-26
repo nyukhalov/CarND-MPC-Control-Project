@@ -46,7 +46,7 @@ std::ostream& operator<<(std::ostream& os, const MPCConfig& config);
 
 class MPC {
 public:
-  MPC(const MPCConfig config);
+  MPC(const MPCConfig config_in);
 
   virtual ~MPC();
 
@@ -55,8 +55,7 @@ public:
   MpcSolution solve(const Eigen::VectorXd &state,
                     const Eigen::VectorXd &coeffs) const;
 
-private:
-  const MPCConfig _config;
+  const MPCConfig config;
 };
 
 #endif  // MPC_H
