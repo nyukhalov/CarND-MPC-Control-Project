@@ -1,5 +1,4 @@
-#ifndef HELPERS_H
-#define HELPERS_H
+#pragma once
 
 #include <string>
 #include "Eigen-3.3/Eigen/Dense"
@@ -40,5 +39,3 @@ Type polyderiveval(const VectorXd &coeffs, const Type& x) {
 
 // Fit a polynomial.
 VectorXd polyfit(const VectorXd &xvals, const VectorXd &yvals, int order);
-
-#endif  // HELPERS_H

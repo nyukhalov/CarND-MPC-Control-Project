@@ -1,5 +1,4 @@
-#ifndef MPC_H
-#define MPC_H
+#pragma once
 
 #include <vector>
 #include <iostream>
@@ -27,6 +26,7 @@ struct MPCConfig {
   const size_t delta_start;
   const size_t a_start;
 
+  MPCConfig() = delete;
   MPCConfig(size_t num_states_in, double dt_in, double target_vel_in, double lf_in):
     num_states(num_states_in),
     num_actuations(num_states_in - 1),
@@ -57,5 +57,3 @@ public:
 
   const MPCConfig config;
 };
-
-#endif  // MPC_H

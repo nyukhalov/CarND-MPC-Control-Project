@@ -1,5 +1,4 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#pragma once
 
 #include <string>
 #include <opencv2/opencv.hpp>
@@ -28,5 +27,3 @@ private:
 };
 
 } // namespace carnd
-
-#endif

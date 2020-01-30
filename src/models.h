@@ -1,5 +1,4 @@
-#ifndef MODELS_H
-#define MODELS_H
+#pragma once
 
 #include <vector>
 
@@ -23,5 +22,3 @@ struct MpcSolution {
 };
 
 } // namespace carnd
-
-#endif
