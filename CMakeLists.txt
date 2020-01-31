@@ -11,13 +11,25 @@ add_definitions(-std=c++11 -O3)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
-set(sources
-    src/main.cpp
-    src/helpers.cpp
-    src/mpc/MPC.cpp
-    src/mpc/MPCConfig.cpp
-    src/mpc/FG_eval.cpp
-    src/ui/window.cpp
+set(LIB_MPC_SRC
+  src/mpc/MPC.cpp
+  src/mpc/MPCConfig.cpp
+  src/mpc/FG_eval.cpp
+  src/mpc/models.cpp
+)
+
+set(LIB_UI_SRC
+  src/ui/window.cpp
+)
+
+set(MPC_SOURCES
+  src/main.cpp
+  src/helpers.cpp
+)
+
+set(MPC_DEBUG_SOURCES
+  src/mpc_debug.cpp
+  src/helpers.cpp
 )
 
 include_directories(/usr/local/include)
@@ -33,7 +45,16 @@ link_directories(/usr/local/Cellar/libuv/1*/lib)
 
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-add_executable(mpc ${sources})
+add_library(libmpc STATIC
+  ${LIB_MPC_SRC}
+)
+add_library(libui STATIC
+  ${LIB_UI_SRC}
+)
 
-target_link_libraries(mpc ipopt z ssl uv uWS ${OpenCV_LIBS})
+add_executable(mpc ${MPC_SOURCES})
+add_executable(mpc_debug ${MPC_DEBUG_SOURCES})
+
+target_link_libraries(mpc libmpc libui ipopt z ssl uv uWS ${OpenCV_LIBS})
+target_link_libraries(mpc_debug libmpc libui ipopt z ${OpenCV_LIBS})
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 namespace carnd {
 
@@ -20,5 +21,8 @@ struct MpcSolution {
   double throttle;
   std::vector<Pose> trajectory;
 };
+
+std::ostream& operator<<(std::ostream& os, const Pose& pose);
+std::ostream& operator<<(std::ostream& os, const MpcSolution& solution);
 
 } // namespace carnd
