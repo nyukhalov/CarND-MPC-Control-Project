@@ -1,4 +1,4 @@
-#include <math.h>
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -197,16 +197,23 @@ int main()
           std::cout << msg << std::endl;
 
           // drawing the current trajectories
-          double ref_node_radius = 4;
+          double ref_node_radius = 2;
+          double orig_node_radius = 4;
           double mpc_node_radius = 8;
 
           // the colors are in BGR
           cv::Scalar ref_node_color = cv::Scalar(200, 255, 255);
+          cv::Scalar orig_node_color = cv::Scalar(0, 0, 255);
           cv::Scalar heading_color = cv::Scalar(0, 0, 255);
           for (int i = 0; i < veh_ptsx2.size(); i++)
           {
             cv::Point point = pt.transform(veh_ptsx2[i], veh_ptsy2[i]);
             window.circle(point, ref_node_radius, ref_node_color);
+          }
+          for (int i=0; i<v_ptsx.size(); i++)
+          {
+            cv::Point point = pt.transform(v_ptsx[i], v_ptsy[i]);
+            window.circle(point, orig_node_radius, orig_node_color);
           }
           for (const Pose& pose : solution.trajectory)
           {
