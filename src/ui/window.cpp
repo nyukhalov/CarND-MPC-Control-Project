@@ -1,4 +1,5 @@
 #include "window.h"
+
 #include <opencv2/opencv.hpp>
 
 using namespace carnd;

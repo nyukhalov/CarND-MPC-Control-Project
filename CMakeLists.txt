@@ -12,10 +12,12 @@ set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 set(sources
-    src/MPC.cpp
     src/main.cpp
     src/helpers.cpp
-    src/window.cpp
+    src/mpc/MPC.cpp
+    src/mpc/MPCConfig.cpp
+    src/mpc/FG_eval.cpp
+    src/ui/window.cpp
 )
 
 include_directories(/usr/local/include)

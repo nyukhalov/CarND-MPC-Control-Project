@@ -1,24 +1,27 @@
 #include <math.h>
-#include <uWS/uWS.h>
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
 #include <math.h>
-#include <chrono>
+
+#include <uWS/uWS.h>
 #include <opencv2/opencv.hpp>
+
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
-#include "helpers.h"
 #include "json.hpp"
-#include "MPC.h"
-#include "window.h"
+
+#include "helpers.h"
+#include "mpc/MPC.h"
+#include "ui/window.h"
 
 // for convenience
 using nlohmann::json;
 using std::string;
 using std::vector;
+using namespace carnd;
 
 void convert_to_vehicle_coords(
     const vector<double> &ptsx,
