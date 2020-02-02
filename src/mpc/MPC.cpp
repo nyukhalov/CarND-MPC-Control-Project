@@ -115,13 +115,14 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) const {
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
 
-  std::vector<Pose> traj;
+  std::vector<VehicleState> traj;
   for (size_t i=0; i<config.num_states; i++) {
     double x = solution.x[config.x_start + i];
     double y = solution.x[config.y_start + i];
     double heading = solution.x[config.psi_start + i];
     double velocity = solution.x[config.v_start + i];
-    traj.push_back({x, y, heading, velocity});
+    Pose pose = {x, y, heading};
+    traj.push_back({pose, velocity});
   }
   double steering = solution.x[config.delta_start];
   double throttle = solution.x[config.a_start];

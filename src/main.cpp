@@ -16,6 +16,7 @@
 #include "helpers.h"
 #include "mpc/MPC.h"
 #include "ui/window.h"
+#include "ui/visualizer.h"
 
 // for convenience
 using nlohmann::json;
@@ -72,48 +73,18 @@ MPC init_mpc()
   return mpc;
 }
 
-class PointTransformer
-{
-public:
-  PointTransformer(double scale_x, double scale_y, size_t window_height, cv::Point origin) : _scale_x(scale_x),
-                                                                                             _scale_y(scale_y),
-                                                                                             _window_height(window_height),
-                                                                                             _origin(origin)
-  {
-  }
 
-  cv::Point transform(double x, double y) const
-  {
-    double loc_x = _scale_x * x;
-    double loc_y = _scale_y * y;
-    double px = _origin.x - loc_y;
-    double py = _window_height - _origin.y - loc_x;
-    return cv::Point(px, py);
-  }
-
-private:
-  const double _scale_x;
-  const double _scale_y;
-  const size_t _window_height;
-  const cv::Point _origin;
-};
 
 int main()
 {
   uWS::Hub h;
 
   Window window(500, 500, "Main");
-  double scale_x = 8;
-  double scale_y = scale_x;
-  double x_offset = 0.5 * window.width;
-  double y_offset = 0.1 * window.height;
-  cv::Point origin = cv::Point(x_offset, y_offset);
-  PointTransformer pt(scale_x, scale_y, window.height, origin);
-
   const MPC mpc = init_mpc();
+  const Visualizer visualizer(window, mpc.config);
 
   auto cb_last = std::chrono::steady_clock::now();
-  h.onMessage([&mpc, &cb_last, &window, &pt](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+  h.onMessage([&mpc, &cb_last, &visualizer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                                         uWS::OpCode opCode) {
     auto cb_elapsed = std::chrono::steady_clock::now() - cb_last;
     cb_last = std::chrono::steady_clock::now();
@@ -175,9 +146,9 @@ int main()
           // predicted MPC trajectory
           std::vector<double> mpc_ptsx;
           std::vector<double> mpc_ptsy;
-          for (const Pose& pose : solution.trajectory) {
-            mpc_ptsx.push_back(pose.x);
-            mpc_ptsy.push_back(pose.y);
+          for (const auto& state : solution.trajectory) {
+            mpc_ptsx.push_back(state.pose.x);
+            mpc_ptsy.push_back(state.pose.y);
           }
           msgJson["mpc_x"] = mpc_ptsx;
           msgJson["mpc_y"] = mpc_ptsy;
@@ -196,43 +167,7 @@ int main()
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
 
-          // drawing the current trajectories
-          double ref_node_radius = 2;
-          double orig_node_radius = 4;
-          double mpc_node_radius = 8;
-
-          // the colors are in BGR
-          cv::Scalar ref_node_color = cv::Scalar(200, 255, 255);
-          cv::Scalar orig_node_color = cv::Scalar(0, 0, 255);
-          cv::Scalar heading_color = cv::Scalar(0, 0, 255);
-          for (int i = 0; i < veh_ptsx2.size(); i++)
-          {
-            cv::Point point = pt.transform(veh_ptsx2[i], veh_ptsy2[i]);
-            window.circle(point, ref_node_radius, ref_node_color);
-          }
-          for (int i=0; i<v_ptsx.size(); i++)
-          {
-            cv::Point point = pt.transform(v_ptsx[i], v_ptsy[i]);
-            window.circle(point, orig_node_radius, orig_node_color);
-          }
-          for (const Pose& pose : solution.trajectory)
-          {
-            double vel_progress = 1.0 - (mpc.config.target_vel - pose.velocity) / mpc.config.target_vel;
-            cv::Scalar mpc_node_color = cv::Scalar(0, vel_progress * 255, (1 - vel_progress) * 255);
-            double heading = M_PI + M_PI/2 - pose.heading;
-            cv::Point point = pt.transform(pose.x, pose.y);
-            cv::Point heading_point(
-              point.x + mpc_node_radius*cos(heading),
-              point.y + mpc_node_radius*sin(heading)
-            );
-            window.circle(point, mpc_node_radius, mpc_node_color, -1);
-            window.line(point, heading_point, heading_color);
-          }
-          string status = solution.success ? "OK" : "FAIL";
-          cv::Scalar status_color = solution.success ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255);
-          cv::Point status_point(30, 50);
-          window.text(status, status_point, status_color);
-          window.draw();
+          visualizer.visualize(solution, veh_ptsx, veh_ptsy, veh_ptsx2, veh_ptsy2);
 
           // Latency
           // The purpose is to mimic real driving conditions where

@@ -20,6 +20,7 @@ set(LIB_MPC_SRC
 
 set(LIB_UI_SRC
   src/ui/window.cpp
+  src/ui/visualizer.cpp
 )
 
 set(MPC_SOURCES

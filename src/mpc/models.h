@@ -9,6 +9,10 @@ struct Pose {
   double x;
   double y;
   double heading;
+};
+
+struct VehicleState {
+  Pose pose;
   double velocity;
 };
 
@@ -19,10 +23,11 @@ struct MpcSolution {
   bool success;
   double steering; // in radians
   double throttle;
-  std::vector<Pose> trajectory;
+  std::vector<VehicleState> trajectory;
 };
 
 std::ostream& operator<<(std::ostream& os, const Pose& pose);
+std::ostream& operator<<(std::ostream& os, const VehicleState& state);
 std::ostream& operator<<(std::ostream& os, const MpcSolution& solution);
 
 } // namespace carnd

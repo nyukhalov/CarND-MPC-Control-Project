@@ -8,24 +8,33 @@ std::ostream& carnd::operator<<(std::ostream& os, const Pose& pose)
       << "x=" << pose.x
       << ", y=" << pose.y
       << ", heading=" << pose.heading
-      << ", vel=" << pose.velocity
+     << "}";
+  return os;
+}
+
+std::ostream& carnd::operator<<(std::ostream& os, const VehicleState& state)
+{
+  os << "VehicleState{"
+      << "pose=" << state.pose
+      << ", velocity=" << state.velocity
      << "}";
   return os;
 }
 
 std::ostream& carnd::operator<<(std::ostream& os, const MpcSolution& solution)
 {
-  os << "MpcSolution{"
-      << "success=" << (solution.success? "true": "false")
-      << ", steering=" << solution.steering
-      << ", throttle=" << solution.throttle
-      << ", trajectory=[";
+  os << "MpcSolution{" << std::endl
+      << "\tsuccess=" << (solution.success? "true": "false") << std::endl
+      << "\tsteering=" << solution.steering << std::endl
+      << "\tthrottle=" << solution.throttle << std::endl
+      << "\ttrajectory=[" << std::endl;
 
   for(const auto& pose: solution.trajectory)
   {
-    os << pose << ", ";
+    os << "\t\t" << pose << std::endl;
   }
 
-  os << "]}";
+  os << "\t]" << std::endl
+     << "}";
   return os;
 }

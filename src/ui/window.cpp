@@ -14,24 +14,24 @@ Window::Window(size_t width_in, size_t height_in, std::string name_in):
     reset_frame();
   }
 
-void Window::circle(cv::Point center, size_t radius, cv::Scalar color, int thickness) {
+void Window::circle(cv::Point center, size_t radius, cv::Scalar color, int thickness) const {
   cv::circle(_frame, center, radius, color, thickness);
 }
 
-void Window::line(cv::Point from, cv::Point to, cv::Scalar color) {
+void Window::line(cv::Point from, cv::Point to, cv::Scalar color) const {
   cv::line(_frame, from, to, color);
 }
 
-void Window::text(const std::string& text, cv::Point at, cv::Scalar color) {
+void Window::text(const std::string& text, cv::Point at, cv::Scalar color) const {
   cv::putText(_frame, text, at, cv::FONT_HERSHEY_SIMPLEX, 0.7, color);
 }
 
-void Window::draw() {
+void Window::draw() const {
   imshow(_name, _frame);
   cv::waitKey(1);
   reset_frame();
 }
 
-void Window::reset_frame() {
+void Window::reset_frame() const {
   _frame = cv::Mat(height, width, CV_8UC3, _background_color);
 }
