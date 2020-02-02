@@ -73,8 +73,6 @@ MPC init_mpc()
   return mpc;
 }
 
-
-
 int main()
 {
   uWS::Hub h;
@@ -85,7 +83,7 @@ int main()
 
   auto cb_last = std::chrono::steady_clock::now();
   h.onMessage([&mpc, &cb_last, &visualizer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
-                                        uWS::OpCode opCode) {
+                                            uWS::OpCode opCode) {
     auto cb_elapsed = std::chrono::steady_clock::now() - cb_last;
     cb_last = std::chrono::steady_clock::now();
     std::cout << "Callback took "
@@ -119,6 +117,19 @@ int main()
           vector<double> veh_ptsy(ptsy.size());
           convert_to_vehicle_coords(ptsx, ptsy, px, py, psi, veh_ptsx, veh_ptsy);
 
+          std::cout  << "ptsx=[" << std::endl;
+          for (const auto &x : veh_ptsx)
+          {
+              std::cout << x << std::endl;
+          }
+          std::cout << "]" << std::endl
+                    << "ptsy=[" << std::endl;
+          for (const auto &y : veh_ptsy)
+          {
+              std::cout << y << std::endl;
+          }
+          std::cout << "]" << std::endl;
+
           VectorXd v_ptsx = VectorXd::Map(veh_ptsx.data(), veh_ptsx.size());
           VectorXd v_ptsy = VectorXd::Map(veh_ptsy.data(), veh_ptsy.size());
           VectorXd coeffs = polyfit(v_ptsx, v_ptsy, 3);
@@ -146,7 +157,8 @@ int main()
           // predicted MPC trajectory
           std::vector<double> mpc_ptsx;
           std::vector<double> mpc_ptsy;
-          for (const auto& state : solution.trajectory) {
+          for (const auto &state : solution.trajectory)
+          {
             mpc_ptsx.push_back(state.pose.x);
             mpc_ptsy.push_back(state.pose.y);
           }

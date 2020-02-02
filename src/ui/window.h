@@ -15,6 +15,8 @@ public:
   void text(const std::string& text, cv::Point at, cv::Scalar color) const;
   void draw() const;
 
+  void await() const;
+
   const size_t width;
   const size_t height;
 

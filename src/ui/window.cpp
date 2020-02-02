@@ -32,6 +32,10 @@ void Window::draw() const {
   reset_frame();
 }
 
+void Window::await() const {
+  cv::waitKey(-1);
+}
+
 void Window::reset_frame() const {
   _frame = cv::Mat(height, width, CV_8UC3, _background_color);
 }
