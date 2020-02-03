@@ -143,7 +143,7 @@ int main()
           state << v_px, v_py, v_psi, v;
 
           auto mpc_clock_begin = std::chrono::steady_clock::now();
-          MpcSolution solution = mpc.solve(state, coeffs);
+          MpcSolution solution = mpc.solve(state, coeffs, v_ptsx, v_ptsy);
           auto mpc_elapsed = std::chrono::steady_clock::now() - mpc_clock_begin;
           std::cout << "MPC solver took "
                     << std::chrono::duration_cast<std::chrono::milliseconds>(mpc_elapsed).count()

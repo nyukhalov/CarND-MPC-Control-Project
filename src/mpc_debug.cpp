@@ -41,7 +41,7 @@ int main()
   VectorXd state(4);
   state << v_px, v_py, v_psi, v;
 
-  MpcSolution solution = mpc.solve(state, coeffs);
+  MpcSolution solution = mpc.solve(state, coeffs, ref_pts_x_vec, ref_pts_y_vec);
 
   std::cout << solution << std::endl;
 

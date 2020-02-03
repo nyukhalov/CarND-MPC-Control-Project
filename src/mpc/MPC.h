@@ -19,7 +19,9 @@ public:
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuations.
   MpcSolution solve(const Eigen::VectorXd &state,
-                    const Eigen::VectorXd &coeffs) const;
+                    const Eigen::VectorXd &coeffs,
+                    const Eigen::VectorXd& ref_pts_x,
+                    const Eigen::VectorXd& ref_pts_y) const;
 
   const MPCConfig config;
 };

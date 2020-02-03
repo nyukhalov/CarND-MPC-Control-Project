@@ -2,7 +2,10 @@
 #include "MPCConfig.h"
 #include "../helpers.h"
 
+#include <cppad/cppad.hpp>
+
 using namespace carnd;
+using CppAD::Value;
 
 // `fg` is a vector of the cost constraints
 // `vars` is a vector of variable values (state & actuators)
@@ -17,11 +20,9 @@ void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
     AD<double> y = vars[t + config.y_start];
     AD<double> y_des = polyeval(coeffs, x);
     AD<double> cte = y_des - y;
-
     AD<double> psi = vars[t + config.psi_start];
     AD<double> psi_des = CppAD::atan(polyderiveval(coeffs, x));
     AD<double> epsi = psi - psi_des;
-
     AD<double> vel_err = vars[t + config.v_start] - config.target_vel;
 
     fg[0] += CppAD::pow(cte, 2);
@@ -30,13 +31,21 @@ void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
   }
 
   for (size_t t = 0; t < config.num_actuations; ++t) {
-    fg[0] += 100 * CppAD::pow(vars[t + config.delta_start], 2);
-    fg[0] += CppAD::pow(vars[t + config.a_start], 2);
+    AD<double> delta = vars[t + config.delta_start];
+    AD<double> accel = vars[t + config.a_start];
+
+    fg[0] += 100 * CppAD::pow(delta, 2);
+    fg[0] += CppAD::pow(accel, 2);
   }
 
   for (size_t t = 1; t < config.num_actuations; ++t) {
-    fg[0] += 100 * CppAD::pow(vars[t + config.delta_start] - vars[t - 1 + config.delta_start], 2);
-    fg[0] += CppAD::pow(vars[t + config.a_start] - vars[t - 1 + config.a_start], 2);
+    AD<double> accel_cur = vars[t + config.a_start];
+    AD<double> accel_prev = vars[t - 1 + config.a_start];
+    AD<double> delta_cur = vars[t + config.delta_start];
+    AD<double> delta_prev = vars[t - 1 + config.delta_start];
+
+    fg[0] += 100 * CppAD::pow(delta_cur - delta_prev, 2);
+    fg[0] += CppAD::pow(accel_cur - accel_prev, 2);
   }
 
   //

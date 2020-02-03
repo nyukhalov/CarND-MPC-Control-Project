@@ -21,7 +21,7 @@ using namespace carnd;
 MPC::MPC(const MPCConfig config_in): config(config_in) {}
 MPC::~MPC() {}
 
-MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) const {
+MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs, const VectorXd& ref_pts_x, const VectorXd& ref_pts_y) const {
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
   double x = state[0];
@@ -90,7 +90,7 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs) const {
   constraints_upperbound[config.v_start] = v;
 
   // Object that computes objective and constraints
-  FG_eval fg_eval(coeffs, config);
+  FG_eval fg_eval(ref_pts_x, ref_pts_y, coeffs, config);
 
   // options
   std::string options;
