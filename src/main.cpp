@@ -49,7 +49,7 @@ void convert_to_vehicle_coords(
 
 MPC init_mpc()
 {
-  const double target_vel = 50;
+  const double target_vel = 100;
 
   // prediction horizon settings
   const size_t num_states = 10;

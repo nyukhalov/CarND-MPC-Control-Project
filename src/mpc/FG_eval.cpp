@@ -27,18 +27,18 @@ void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
     AD<double> psi = vars[t + config.psi_start];
     AD<double> psi_des = CppAD::atan(polyderiveval(coeffs, x));
     AD<double> epsi = psi - psi_des;
-    AD<double> vel_err = vars[t + config.v_start] - config.target_vel;
+    AD<double> vel_err = (config.target_vel - vars[t + config.v_start]) / config.target_vel;
 
-    fg[0] += CppAD::pow(cte, 2);
-    fg[0] += 50 * CppAD::pow(epsi, 2);
-    fg[0] += CppAD::pow(vel_err, 2);
+    fg[0] += 10 * CppAD::pow(cte, 2);
+    fg[0] += 500 * CppAD::pow(epsi, 2);
+    fg[0] += 300 * CppAD::pow(vel_err, 2);
   }
 
   for (size_t t = 0; t < config.num_actuations; ++t) {
     AD<double> delta = vars[t + config.delta_start];
     AD<double> accel = vars[t + config.a_start];
 
-    fg[0] += 200 * CppAD::pow(delta, 2);
+    fg[0] += 300 * CppAD::pow(delta, 2);
     fg[0] += CppAD::pow(accel, 2);
   }
 
@@ -48,7 +48,7 @@ void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
     AD<double> delta_cur = vars[t + config.delta_start];
     AD<double> delta_prev = vars[t - 1 + config.delta_start];
 
-    fg[0] += 200 * CppAD::pow(delta_cur - delta_prev, 2);
+    fg[0] += 5000 * CppAD::pow(delta_cur - delta_prev, 2);
     fg[0] += CppAD::pow(accel_cur - accel_prev, 2);
   }
 
