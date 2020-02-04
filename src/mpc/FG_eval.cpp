@@ -32,8 +32,8 @@ void FG_eval::operator()(ADvector &fg, const ADvector &vars)
     AD<double> vel_err = (config.target_vel - vars[t + config.v_start]) / config.target_vel;
 
     fg[0] += CppAD::pow(cte, 2);
-    fg[0] += 500 * CppAD::pow(epsi, 2);
-    fg[0] += 300 * CppAD::pow(vel_err, 2);
+    fg[0] += 1000 * CppAD::pow(epsi, 2);
+    fg[0] += 1000 * CppAD::pow(vel_err, 2);
 
     if (t > 1)
     {
