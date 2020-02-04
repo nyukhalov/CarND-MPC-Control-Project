@@ -9,6 +9,10 @@ using CppAD::Value;
 
 // `fg` is a vector of the cost constraints
 // `vars` is a vector of variable values (state & actuators)
+// nx = vars.size()
+// ng = fg.size() - 1
+// fg[0] = f(x)
+// fg[1 + i] = g_i(x)
 void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
   // The cost is stored is the first element of `fg`.
   // Any additions to the cost should be added to `fg[0]`.
@@ -26,7 +30,7 @@ void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
     AD<double> vel_err = vars[t + config.v_start] - config.target_vel;
 
     fg[0] += CppAD::pow(cte, 2);
-    fg[0] += CppAD::pow(epsi, 2);
+    fg[0] += 50 * CppAD::pow(epsi, 2);
     fg[0] += CppAD::pow(vel_err, 2);
   }
 
@@ -34,7 +38,7 @@ void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
     AD<double> delta = vars[t + config.delta_start];
     AD<double> accel = vars[t + config.a_start];
 
-    fg[0] += 100 * CppAD::pow(delta, 2);
+    fg[0] += 200 * CppAD::pow(delta, 2);
     fg[0] += CppAD::pow(accel, 2);
   }
 
@@ -44,7 +48,7 @@ void FG_eval::operator()(ADvector& fg, const ADvector& vars) {
     AD<double> delta_cur = vars[t + config.delta_start];
     AD<double> delta_prev = vars[t - 1 + config.delta_start];
 
-    fg[0] += 100 * CppAD::pow(delta_cur - delta_prev, 2);
+    fg[0] += 200 * CppAD::pow(delta_cur - delta_prev, 2);
     fg[0] += CppAD::pow(accel_cur - accel_prev, 2);
   }
 

@@ -37,6 +37,8 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs, const Vect
   // Number of constraints
   size_t n_constraints = config.num_states * num_state_vars;
 
+  // the initial point where Ipopt starts the optimization process.
+  // size of nx
   // Initial value of the independent variables.
   // Should be 0 except for the initial values.
   Dvector vars(n_vars);
@@ -49,6 +51,8 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs, const Vect
   vars[config.psi_start] = psi;
   vars[config.v_start] = v;
 
+  // the lower and upper limits for the argument in the optimization problem
+  // size of nx
   // Lower and upper limits for x
   Dvector vars_lowerbound(n_vars);
   Dvector vars_upperbound(n_vars);
@@ -73,6 +77,7 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs, const Vect
   // Lower and upper limits for constraints
   // All of these should be 0 except the initial
   // state indices.
+  // size of ng
   Dvector constraints_lowerbound(n_constraints);
   Dvector constraints_upperbound(n_constraints);
   for (size_t i = 0; i < n_constraints; ++i) {
@@ -103,8 +108,10 @@ MpcSolution MPC::solve(const VectorXd &state, const VectorXd &coeffs, const Vect
 
   // solve the problem
   CppAD::ipopt::solve<Dvector, FG_eval>(
-      options, vars, vars_lowerbound, vars_upperbound, constraints_lowerbound,
-      constraints_upperbound, fg_eval, solution);
+      options,
+      vars, vars_lowerbound, vars_upperbound, // xi, xl, xu, where xl <= xi <= xu
+      constraints_lowerbound, constraints_upperbound, // gl, gu, where gl <= g(x) <= gu
+      fg_eval, solution);
 
   //
   // Check some of the solution values
