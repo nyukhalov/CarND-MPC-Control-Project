@@ -1,8 +1,7 @@
-#include "MPC.h"
+#include "mpc_control.h"
 #include "FG_eval.h"
-#include "../helpers.h"
-
-#include "../Eigen-3.3/Eigen/Core"
+#include "helpers.h"
+#include "Eigen/Core"
 
 #include <iostream>
 #include <string>

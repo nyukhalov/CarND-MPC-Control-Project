@@ -1,11 +1,12 @@
 #include "helpers.h"
-#include "mpc/MPCConfig.h"
-#include "mpc/MPC.h"
-#include "mpc/models.h"
-#include "ui/window.h"
-#include "ui/visualizer.h"
+#include <mpc/MPCConfig.h>
+#include <mpc/mpc_control.h>
+#include <mpc/models.h>
+#include <mpc/helpers.h>
+#include <ui/window.h>
+#include <ui/visualizer.h>
 
-#include "Eigen-3.3/Eigen/Core"
+#include "Eigen/Core"
 
 #include <iostream>
 

@@ -9,19 +9,21 @@
 #include <uWS/uWS.h>
 #include <opencv2/opencv.hpp>
 
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
+#include "Eigen/Core"
+#include "Eigen/QR"
 #include "json.hpp"
-
 #include "helpers.h"
-#include "mpc/MPC.h"
-#include "ui/window.h"
-#include "ui/visualizer.h"
+
+#include <mpc/mpc_control.h>
+#include <mpc/helpers.h>
+#include <ui/window.h>
+#include <ui/visualizer.h>
 
 // for convenience
 using nlohmann::json;
 using std::string;
 using std::vector;
+using Eigen::VectorXd;
 using namespace carnd;
 
 void convert_to_vehicle_coords(

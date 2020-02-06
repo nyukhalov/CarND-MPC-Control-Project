@@ -1,6 +1,6 @@
 #include "FG_eval.h"
 #include "MPCConfig.h"
-#include "../helpers.h"
+#include "helpers.h"
 
 #include <cppad/cppad.hpp>
 

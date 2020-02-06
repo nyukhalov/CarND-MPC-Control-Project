@@ -2,7 +2,7 @@
 
 #include "MPCConfig.h"
 #include "models.h"
-#include "../Eigen-3.3/Eigen/Core"
+#include "Eigen/Core"
 
 #include <cppad/cppad.hpp>
 
