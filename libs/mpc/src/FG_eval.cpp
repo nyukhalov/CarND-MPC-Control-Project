@@ -1,5 +1,5 @@
 #include "FG_eval.h"
-#include "MPCConfig.h"
+#include "config.h"
 #include "helpers.h"
 
 #include <cppad/cppad.hpp>

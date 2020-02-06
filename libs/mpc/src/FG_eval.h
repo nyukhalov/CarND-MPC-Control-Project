@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MPCConfig.h"
+#include "config.h"
 #include "models.h"
 #include "Eigen/Core"
 

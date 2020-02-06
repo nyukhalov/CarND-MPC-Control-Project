@@ -2,7 +2,7 @@
 
 #include "window.h"
 
-#include <mpc/MPCConfig.h>
+#include <mpc/config.h>
 #include <mpc/models.h>
 
 #include <vector>

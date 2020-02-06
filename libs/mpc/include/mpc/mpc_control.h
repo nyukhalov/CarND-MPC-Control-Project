@@ -1,7 +1,7 @@
 #pragma once
 
 #include "models.h"
-#include "MPCConfig.h"
+#include "config.h"
 #include "Eigen/Core"
 
 #include <vector>

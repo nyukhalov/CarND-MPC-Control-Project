@@ -1,5 +1,5 @@
 #include "helpers.h"
-#include <mpc/MPCConfig.h>
+#include <mpc/config.h>
 #include <mpc/mpc_control.h>
 #include <mpc/models.h>
 #include <mpc/helpers.h>

@@ -5,7 +5,7 @@ add_library(${TARGET} STATIC
     src/FG_eval.h
     src/models.cpp
     src/mpc_control.cpp
-    src/MPCConfig.cpp
+    src/config.cpp
     src/helpers.cpp
 )
 
